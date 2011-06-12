@@ -1,19 +1,17 @@
 import Data.List
 import Char
 import Stack
+import Tokeniser
 
 data Expr = Num { num :: Integer } | Var { varStr :: String } | Array [Integer] | Matrix [[Integer]]
             deriving (Show, Eq)
 
 type EStack = Stack Expr
 
-eval :: EStack -> Char -> EStack
-eval s c
-    | c == ' ' = s
-    | isDigit c = let d = charToDigit c in          -- If the previous number is on the stack, concat with new Num
-                    if (not $ isEmpty s) && (isNum $ peek s) then let (i,t) = pop s in push t $ Num $ (num i)*10 + d
-                                      else push s $ Num d
-    | otherwise = pop2into s $ case c of
+eval :: EStack -> Token -> EStack
+eval s (Const n) = push s $ Num n
+eval s (Symbol ' ') = s
+eval s (Symbol c) = pop2into s $ case c of
                     '+' -> addE
                     '-' -> subE
                     '*' -> mulE
@@ -21,15 +19,13 @@ eval s c
 
 
 run :: EStack -> String -> EStack
-run = foldl eval
+run s prog = foldl eval s (tokenise (Symbol ' ') prog)
+
 
 
 isNum :: Expr -> Bool
 isNum (Num _) = True
 isNum _       = False
-
-charToDigit :: Char -> Integer
-charToDigit c = read [c]
 
 
 addE :: Expr -> Expr -> Expr

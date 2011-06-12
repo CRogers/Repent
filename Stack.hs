@@ -1,4 +1,4 @@
-module Stack (Stack(EmptyStack, Stack), isEmpty, push, pop, popN, pop2into, peek) where
+module Stack (Stack(EmptyStack, Stack), isEmpty, push, pop, popN, pop2into, peek, dropWhileS) where
 
 data Stack a = EmptyStack | Stack a (Stack a)
             deriving (Show, Eq)
@@ -27,3 +27,7 @@ pop2into s f = push u $ f i j
 peek :: Stack a -> a
 peek EmptyStack = error("Cannot peek from an empty stack")
 peek (Stack i _) = i
+
+dropWhileS :: (a -> Bool) -> Stack a -> Stack a
+dropWhileS _ EmptyStack         = EmptyStack
+dropWhileS f st@(Stack i s)     = if f i then dropWhileS f s else st
